@@ -1,4 +1,4 @@
 nonstopwords
 ============
 
-Online word search game - NonstopWords.com
+Online word search game - http://NonstopWords.com
