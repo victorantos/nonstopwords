@@ -1,0 +1,59 @@
+﻿
+<fieldset id="feedbackForm" style="width: 300px; display:none;"  data-bind="visible: viewModel.feedbackViewModel.showFeedback">
+    <legend style="display: block;" data-bind="html: 'Want to play more levels? Please subscribe and we\'ll notify you when new game levels are added.<br/> (We promise: No spam!)' "></legend>
+
+    <label for="userEmail">Your email:</label>
+    <input type="text" name="userEmail" value=""
+        id="txtUserEmail" data-bind="value: viewModel.feedbackViewModel.userEmail" />
+    <label for="feedbackMessage">Your feedback & suggestions are very important to us:</label>(<i>optional</i>):
+                    <textarea name="feedbackMessage" data-bind="value: viewModel.feedbackViewModel.feedbackMessage" cols="37"></textarea>
+    <div style="text-align: right;">
+        <button id="btnSendFeedback" data-bind="click: viewModel.feedbackViewModel.sendFeedback">Send</button>
+    </div>
+    <h3 data-bind="fadeInText: 'Thank you!', visible: viewModel.feedbackViewModel.showThankYou"></h3>
+</fieldset>
+
+<script type="text/javascript">
+    jQuery("#btnSendFeedback").button({
+        icons: {
+            primary: "ui-icon-arrowreturnthick-1-e"
+        },
+        text: true
+    });
+</script>   
+
+<script type="text/javascript">
+    function FeedbackViewModel() {
+        var self = this;
+        this.userEmail = ko.observable();
+        this.feedbackMessage = ko.observable();
+        this.showThankYou = ko.observable(false);
+        this.showFeedback = ko.observable(true);
+        this.isSubscribed = ko.observable(false);
+        this.sendFeedback = function () {
+
+            var theFeedback = {
+                Email: self.userEmail(),
+                Message: self.feedbackMessage()
+            };
+            jQuery.post("/home/feedback", theFeedback, function (returnedData) {
+                if (returnedData) {
+                    if (self.userEmail() || self.feedbackMessage()) {
+                        self.isSubscribed(true);
+                        self.showThankYou(true);
+                    }
+                };
+            });
+
+        };
+        ko.bindingHandlers.fadeInText = {
+            'update': function (element, valueAccessor) {
+                jQuery(element).hide();
+                ko.bindingHandlers.text.update(element, valueAccessor);
+                jQuery(element).fadeIn('slow');
+            }
+        };
+    }
+
+    
+</script>

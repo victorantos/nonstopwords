@@ -1,0 +1,782 @@
+﻿@model Wordament.Models.GameViewModel
+ 
+@{
+    ViewBag.Title = "Puzzle";
+}
+  
+<style type="text/css">
+    /*keep this unselectable class on the top*/
+    *.unselectable {
+        -moz-user-select: -moz-none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        /*
+     Introduced in IE 10.
+     See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+   */
+        -ms-user-select: none;
+        user-select: none;
+    }
+     
+    
+     .cellSelected {
+        background-color: #0094ff;
+    }
+
+    .grid {
+        border: 1px solid gray;
+        cursor: crosshair;
+        border-collapse: collapse;
+        background-color: rgb(239, 248, 243);
+    }
+
+        .grid td {
+            padding-left: 2px;
+            padding-right: 2px;
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+
+    .gridRow span {
+       
+        display: inline-block;
+        border: 1px solid;
+        border-color: #00ff90;
+    }
+
+    .cell {
+        background-color: white;
+        width: 40px;
+        height: 40px;
+        font-size: xx-large;
+        text-align: center;
+    }
+
+    .hoverChosen {
+        background-color: #ffd800;
+    }
+
+    .letterChosen {
+        background-color: #00ff90;
+    }
+
+    .correct {
+        color: #808080;
+        font-weight: bold;
+        font-size: xx-large;
+    }
+
+    .findWord {
+        color: #808080;
+        font-weight: bold;
+        font-size: small;
+    }
+
+    .wordFound {
+        text-decoration: line-through;
+    }
+
+    div.loadingImage {
+        width: 16px;
+        height: 16px;
+        background-image: url(data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA%3D%3D);
+    }
+
+    td {
+        padding: 0 0 0 0;
+    }
+</style>
+
+ 
+<style>
+    .nswPopup {
+        -khtml-opacity: .50;
+        -moz-opacity: .50;
+        -ms-filter: "alpha(opacity=50)";
+        filter: alpha(opacity=50);
+        filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.5);
+        opacity: .50;
+    }
+
+    #alpha_wrapper {
+        width: 240px;
+        
+        float: left;
+        position: absolute;
+        color: #fff;
+        padding-left: 11px;
+        padding-top: 23px;
+    }
+
+    #alpha_2 {
+        background: transparent;
+        background-color: white;
+        width: 240px;
+        height: 240px;
+        float: left;
+        filter: alpha(opacity=80);
+        -moz-opacity: 0.8;
+        -khtml-opacity: 0.8;
+        opacity: 0.8;
+        border: 1px dashed Gray;
+ 
+    }
+
+    #text_holder_2 {
+        background: white;
+        position: absolute;
+       
+        font-size: large;
+    }
+</style>
+<article style="line-height: normal;">
+    <table>
+        <tr>
+            <td colspan="2">
+                <table>
+                    <tr>
+                        <td>
+                            <div id="radio" style="text-align: left;">
+
+                                <div id="countdown" style="display: inline;">
+                                </div>
+                                <div style="display: none;" data-bind="visible: showLanguage()">
+                                    <input type="radio" id="radio1" name="languageGroup" value="en" data-bind="checked: language" /><label for="radio1">English</label>
+                                    <input type="radio" id="radio2" name="languageGroup" value="ro" data-bind="checked: language" /><label for="radio2">Romanian</label>
+                                </div>
+
+                            </div>
+
+
+                        </td>
+                     
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td id="wordsearchgame">
+
+ 
+                <table>
+
+                    <tr>
+                        <td data-bind="visible: nrLevels()>1 && level()!=0, text: 'Game ' + level() + ' of '+ nrLevels()"></td>
+                    </tr>
+                    <tr>
+                        <td style="padding-right: 5px;">
+
+                            <div id="alpha_wrapper" data-bind="style: {width: rows().length*45 + 'px'  }, visible: isPopupVisible ">
+
+                                <div id="alpha_2" data-bind="style: {width: rows().length*42 + 'px', height: rows().length*42 + 'px'  }">
+                                </div>
+                                <!-- alpha_2 ends -->
+
+                                <div id="text_holder_2" style="top:40%;"  data-bind="style: {left: rows().length*21 -50 + 'px' }" >
+ 
+                                    <button  id="btnPlay" data-bind="click: startGame " style="" >PLAY</button>
+ 
+                                </div>
+                                <!-- text_holder_2 ends -->
+
+                            </div>
+                            <table id="wordsearchGrid" unselectable="on" class="unselectable grid">
+                                <tbody data-bind="foreach: rows()">
+                                    <tr data-bind="gridRow: $data" unselectable="on">
+                                        <!-- ko foreach: $data.cells   -->
+                                        <td unselectable="on">
+                                            <span unselectable="on" class="unselectable" data-bind="cell: $data, text: letter, css: { letterChosen: $parent.selectedCells.indexOf($index()+1)!=-1 ,  correct: $parent.permanentSelectedCells.indexOf($index()+1)!=-1}"></span>
+                                        </td>
+                                        <!-- /ko -->
+                                    </tr>
+                                </tbody>
+
+                            </table>
+
+
+                        </td>
+
+                    </tr>
+                </table>
+                <ol class="findWord" style="display: none;" data-bind="visible: words().length > 0  ">
+
+                    <li style="list-style: none; font-size: medium; font-style: italic; text-align: center;" data-bind="fadeInHtml: '<hr/>Game Over!</br>', visible: isGameOver"></li>
+                    <li style="display: none; list-style: none; font-size: medium; font-style: italic; text-align: center;" data-bind="visible: showStopwatch() && isGameOver() && !isSaved() ">
+                        <input type="text" name="playerName" placeholder="Anonymous" data-bind="value: playerName" /><br />
+                        <button id="btnSaveScore" data-bind="click: saveScore">Save score</button>
+                    </li>
+
+                    <li style="list-style: none;" data-bind="visible: isGameOver">
+                        <button id="btnNewGame" data-bind="click: newGame, disable : isDemoOver, visible: !isDaily() ">Next game</button>
+
+                    </li>
+                    <li style="list-style: none; font-size: medium; font-style: italic; text-align: center;" data-bind="fadeInHtml: '<hr/>Congratulations!<br/> Please check back tomorrow for new games!</br>', visible: isDemoOver"></li>
+                    <li style="list-style: none; font-size: medium; font-style: italic; text-align: center;" data-bind="fadeInHtml:  fbLike, visible: isDemoOver"></li>
+
+                </ol>
+                <div style="display: none;"  id="yourFeedbackSection">
+                    @{ Html.RenderPartial("YourFeedback");  }
+                </div>
+
+            </td>
+
+            <td id="words" style="width: 30px; padding-left: 5px;">
+
+                <div id="wordsToFind" data-bind="if: showWordsToFind()">
+                    Words to find:<br />
+                    <ul data-bind="foreach: words" style="width: 100px;">
+                        <li data-bind="css: { wordFound: $data.isFound() }"><span data-bind="text: $data.word  "></span></li>
+                    </ul>
+                </div>
+                <div style="width: 100%;" data-bind="style: {height: parseInt(document.getElementById('wordsearchGrid').clientHeight) -  parseInt(document.getElementById('wordsToFind').clientHeight)-70+ 'px'}">&nbsp;</div>
+
+            </td>
+        </tr>
+
+    </table>
+
+    @* 
+    <div class="loadingImage" data-bind="visible: content.loading"></div>
+    *@
+   
+   
+
+
+
+    <script type="text/javascript">
+
+        function gameMove(self, index, x1, y1, x2, y2, valueAccessor, context) {
+
+            var observable = valueAccessor();
+            var gameId = context.$root.gameId();
+
+            var rows = context.$root.rows();
+            for (var k = 0; k < rows.length; k++)
+                rows[k].selectedCells.removeAll();
+
+            if ((x1 == index + 1) && y1 == context.$parent.num) {
+                context.$root.clickedX(0);
+                context.$root.clickedY(0);
+            }
+            else {
+                rows[y2 - 1].selectedCells.push(x2);
+
+                //set the new previous
+                context.$root.clickedX(x2);
+                context.$root.clickedY(y2);
+            }
+
+            jQuery.getJSON("http://nonstopwords.com/games/isCorrectWord?jsoncallback=?&gameId=" + gameId + "&x1=" + x1 + "&y1=" + y1 + "&x2=" + x2 + "&y2=" + y2, function (data) {
+                if (data.result) {
+                    var r = false;
+                    if (data.r)
+                        r = data.r;
+                    drawLine(x1, y1, x2, y2, rows, true, r, context.$root);
+                    //is gameOver?
+                    viewModel.gameModel.isGameOver(viewModel.gameModel.words().length == viewModel.wordsModel.words().length);
+
+                    //remove the green on the last letter, and reset cursor
+
+                    context.$root.clickedX(0);
+                    context.$root.clickedY(0);
+
+                }
+            });
+
+            if (x1 != 0 && y1 != 0) {
+                context.$root.clickedX(0);
+                context.$root.clickedY(0);
+                rows[y2 - 1].selectedCells.pop(x2);
+            }
+
+            //is it correct word?
+            //then put  'correct' class
+            //else reset class, remove letterChosen class
+
+            // observable.points(0);
+        }
+
+        function getLetter(row, x) {
+            //if (x == 1)
+            //    return row.one;
+            //if (x == 2)
+            //    return row.two;
+            //if (x == 3)
+            //    return row.three;
+            //if (x == 4)
+            //    return row.four;
+            //if (x == 5)
+            //    return row.five;
+            return row.cells[x - 1].letter;
+
+
+        }
+
+        function reverse(s) {
+            return s.split("").reverse().join("");
+        }
+
+        function drawLine(x1, y1, x2, y2, rows, isPermanent, isReverse, context) {
+            var maxY, minY, maxX, minX;
+
+            var word = "";
+
+            if (y1 < y2)
+            { maxY = y2; minY = y1; }
+            else
+            { minY = y2; maxY = y1; }
+
+            if (x1 < x2)
+            { maxX = x2; minX = x1; }
+            else
+            { minX = x2; maxX = x1; }
+
+            if (!isPermanent)
+                //remove the green
+                for (var k = 0; k < rows.length; k++)
+                    rows[k].selectedCells.removeAll();
+
+
+            //if it is a vertical line
+            if (x1 == x2) {
+                for (var i = minY - 1; i < maxY; i++)
+                    if (isPermanent) {
+                        rows[i].permanentSelectedCells.push(x1);
+                        word += getLetter(rows[i], x1);
+                    }
+                    else
+                        rows[i].selectedCells.push(x1);
+            }
+            else
+                //if it is a horizontal line
+                if (y1 == y2)
+                    for (var j = minX; j < maxX + 1; j++)
+                        if (isPermanent) {
+                            rows[y1 - 1].permanentSelectedCells.push(j);
+                            word += getLetter(rows[y1 - 1], j);
+                        }
+                        else
+                            rows[y1 - 1].selectedCells.push(j);
+                else {
+                    var temp;
+                    if (x1 > x2) {
+                        temp = x1;
+                        x1 = x2;
+                        x2 = temp;
+                        temp = y2;
+                        y2 = y1;
+                        y1 = temp;
+                    }
+
+
+                    if (y1 > y2)
+                        for (var p = 0; p < x2 - x1 + 1; p++)
+                            if (isPermanent) {
+                                rows[y1 - p - 1].permanentSelectedCells.push(x1 + p);
+                                word += getLetter(rows[y1 - p - 1], x1 + p);
+                            }
+                            else
+                                rows[y1 - p - 1].selectedCells.push(x1 + p);
+                    else
+                        for (var q = 0; q < x2 - x1 + 1; q++)
+                            if (isPermanent) {
+                                if (y1 + q > 0) {
+                                    rows[y1 + q - 1].permanentSelectedCells.push(x1 + q);
+                                    word += getLetter(rows[y1 + q - 1], x1 + q);
+                                }
+                            }
+                            else
+                                if (y1 + q > 0) {
+                                    rows[y1 + q - 1].selectedCells.push(x1 + q);
+                                }
+                }
+            if (isPermanent) {
+                if (isReverse)
+                    word = reverse(word);
+                context.addWord(word);
+                if (!viewModel.wordsModel.markAsFound(word))
+                    viewModel.wordsModel.markAsFound(reverse(word));
+            }
+        }
+
+        function cell(text) { this.letter = text; }
+
+        function Row(number, cells) {
+            this.num = number;
+
+            this.cells = jQuery.map(cells, function (c) {
+                return new cell(c);
+            });
+            this.selectedCells = ko.observableArray([]);
+            this.permanentSelectedCells = ko.observableArray([]);
+
+        }
+
+        function GameViewModel() {
+            var self = this;
+            this.isDemoGame = ko.observable(false);
+            this.showTopPlayers = ko.observable(true);
+            this.showStopwatch = ko.observable('@(Model.ShowStopwatch)' == 'True');
+            this.showLanguage = ko.observable('@(Model.ShowLanguage)' == 'True');
+            this.gameId = ko.observable();
+            this.language = ko.observable("en");
+            this.isDaily = ko.observable(false);
+            this.isPopupVisible = ko.observable(true);
+            this.playerName = ko.observable();
+
+            this.language.subscribe(function (newValue) {
+                self.level(1);
+                self.isDemoOver(false);
+                self.newGame();
+                if (self.showStopwatch()) {
+                    jQuery("#countdown").stopwatch('clear');
+                    jQuery("#countdown").stopwatch('start');
+                }
+            });
+            this.isSubscribed = ko.observable(false);
+
+            this.isDemoOver = ko.observable(false);
+            this.isGameOver = ko.observable(false);
+            this.level = ko.observable(0);
+            this.nrLevels = ko.observable(1);
+            this.currentScore = ko.observable();
+            this.isGameOver.subscribe(function (isFinished) {
+                var data = null;
+                if (isFinished) {
+                    //viewModel.wordsModel.showWordsToFind(false);
+
+                    if (self.showStopwatch()) {
+                        jQuery("#countdown").stopwatch('clear', {
+                            callback: function (days, hours, minutes, seconds) {
+                                self.currentScore(minutes * 60 + seconds);
+                            }
+                        });
+                    }
+                    self.isDemoOver((self.level() == 4 && self.language() == "ro") || (self.level() == 7 && self.language() == "en") || self.isDaily());
+                };
+            });
+
+
+            this.data;
+
+            this.clickedX = ko.observable(0);
+            this.clickedY = ko.observable(0);
+            this.words = ko.observableArray([]);
+            this.addWord = function (word) {
+                //see if we already have this word  
+                var matchingWord = ko.utils.arrayFirst(this.words(), function (item) {
+                    return item === word;
+                });
+
+                if (matchingWord) {
+                    //it's already added
+                } else {
+                    this.words.push(word);
+                }
+            };
+            this.startGame = function () {
+                self.isPopupVisible(false);
+                if (self.showStopwatch()) {
+                    jQuery("#countdown").stopwatch('clear');
+                    jQuery("#countdown").stopwatch('start');
+                }
+            }
+            this.removeWord = function (word) {
+                this.words.remove(word);
+            }
+            this.isSaved = ko.observable(false);
+            this.saveScore = function () {
+
+                var data = {
+                    Id: self.gameId(),
+                    PlayerName: self.playerName(),
+                    Score: self.currentScore(),
+                    userId: '6899E741-2650-4154-8E85-23960C08AD87'
+                };
+
+
+                //jQuery.post("http://localhost/game/gameover", data, function (returnedData) {
+                //    if (returnedData) {
+                //        self.isSaved(true);
+
+                //        if (self.showTopPlayers()) {
+                //            topUsersModel.reLoad();
+                //        }
+                //    }
+                //});
+
+                 
+                   // var jsonData = ko.toJSON(self.words());
+                    //var request = jQuery.ajax({
+                    //    url: "http://nonstopwords.com/game/gameover",
+                    //    type: "POST",
+                    //    data: data,
+                    //    contentType: "application/json; charset=utf-8",
+                    //    dataType: "json",
+                    //});
+
+                    //request.done(function (msg) {
+                    //    self.isSaved(true);
+                    //    if (self.showTopPlayers()) {
+                    //        topUsersModel.reLoad();
+                    //    }
+                    //});
+
+                    //request.fail(function (jqXHR, textStatus) {
+                    //    alert("Request gameover failed: " + textStatus);
+                    //});
+                jQuery.getJSON("http://nonstopwords.com/game/gameover/"+data.Id+"?jsoncallback=?&gameId="  + "&name="+data.PlayerName+"&s="+data.Score+"&userId="+data.userId, function (data) {
+                        self.isSaved(true);
+                        if (self.showTopPlayers())
+                            topUsersModel.reLoad();
+                });
+
+
+            }
+            this.rows = ko.observableArray();
+
+
+            this.showFeedback = ko.computed(function () {
+                return !self.isSubscribed() && (self.level() > 3);
+            });
+
+
+            this.newGame = function () {
+
+                var data = null;
+                viewModel.feedbackViewModel.showThankYou(false);
+
+                self.level(parseInt(self.level()) + 1);
+                jQuery.getJSON("http://nonstopwords.com/games/data/" + self.gameId() + "?jsoncallback=?&level=" + self.level() + "&isDaily=true&language=" + self.language(), function (data) {
+                    if (data) {
+                        self.words([]);
+                        self.isGameOver(false);
+                        self.gameId(data.gameId);
+                        self.nrLevels(data.nrLevels);
+                        topUsersModel.gameGroupId(data.gameId);
+                        self.rows(jQuery.map(data.letters, function (row) {
+                            return new Row(row.num, row.cells);
+                        }));
+                        jQuery.getJSON("http://nonstopwords.com/games/GetWords/" + viewModel.gameModel.gameId() + "?jsoncallback=?", function (data) {
+                            if (data) {
+                                viewModel.wordsModel.words(jQuery.map(data.words, function (w) {
+                                    return new Word(w);
+                                }));
+
+                                // viewModel.wordsModel.showWordsToFind(true);
+                            }
+                        });
+                        topUsersModel.reLoad();
+
+                        self.isSaved(false);
+                        if (self.showStopwatch()) {
+                            jQuery("#countdown").stopwatch('clear');
+                            jQuery("#countdown").stopwatch('start');
+                        }
+
+                    }
+                });
+            };
+            ko.bindingHandlers.fadeInText = {
+                'update': function (element, valueAccessor) {
+                    jQuery(element).hide();
+                    ko.bindingHandlers.text.update(element, valueAccessor);
+                    jQuery(element).fadeIn('slow');
+                }
+            };
+            ko.bindingHandlers.fadeInHtml = {
+                'update': function (element, valueAccessor) {
+                    jQuery(element).hide();
+                    ko.bindingHandlers.html.update(element, valueAccessor);
+                    jQuery(element).fadeIn('slow');
+                }
+            };
+
+            ko.bindingHandlers.gridRow = {
+                init: function (element, valueAccessor, allBindingsAccessor, viewModel, context) {
+                    jQuery(element).addClass("gridRow");
+
+                },
+                update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
+                }
+            };
+
+            ko.bindingHandlers.cell = {
+                init: function (element, valueAccessor, allBindingsAccessor, viewModel, context) {
+                    jQuery(element).addClass("cell");
+
+                    jQuery(element).each(
+                        function (index) {
+                            jQuery(this)
+                                .hover(
+                                       function () {
+                                           index = context.$index();
+                                           var observable = valueAccessor();
+
+                                           // observable.points(observable.points() + 2 * (index + 1));
+
+                                           var x1 = context.$root.clickedX();
+                                           var y1 = context.$root.clickedY();
+
+                                           var self = jQuery(this);
+                                           var isDrag = !(x1 == 0 && y1 == 0);
+                                           //if it is not drag then yellow
+                                           if (!isDrag)
+                                               jQuery(this).addClass("hoverChosen");
+                                           else {
+                                               var isInline = false;
+
+                                               var x2 = context.$index() + 1;
+                                               var y2 = context.$parent.num;
+                                               var rows = context.$root.rows();
+
+                                               jQuery.getJSON("http://nonstopwords.com/games/isInline?jsoncallback=?&gameId=" + context.$root.gameId() + "&x1=" + x1 + "&y1=" + y1 + "&x2=" + x2 + "&y2=" + y2, function (data) {
+                                                   isInline = data.result;
+                                                   var r = false;
+                                                   if (data.r)
+                                                       r = data.r;
+                                                   if (isInline) {
+                                                       //make new green line
+                                                       drawLine(x1, y1, x2, y2, rows, false, r);
+                                                   }
+                                                   else {
+                                                       //remove the green
+                                                       for (var k = 0; k < rows.length; k++)
+                                                           rows[k].selectedCells.removeAll();
+
+                                                       //mark the initial cell
+                                                       rows[y1 - 1].selectedCells.push(x1);
+
+                                                       //jQuery(".letterChosen").each(function (j) {
+                                                       //    jQuery(this).removeClass("letterChosen");
+                                                       //});
+
+                                                   }
+                                               });
+                                           }
+                                           //if yes than put letterChosen
+                                           // else don't put anything
+
+                                       },
+                                       function () {
+
+                                           jQuery(this).removeClass("hoverChosen");
+
+                                           var observable = valueAccessor();
+                                           //observable.points(observable.points() - 2 * (index + 1));
+
+                                       }
+                                  )
+                                 .mousedown(function () {
+                                     index = context.$index();
+                                     var self = jQuery(this);
+                                     var observable = valueAccessor();
+
+                                     var x1, y1, x2, y2;
+                                     x1 = context.$root.clickedX();
+                                     y1 = context.$root.clickedY();
+
+                                     x2 = index + 1;
+                                     y2 = context.$parent.num;
+                                     if (x1 == 0 && y1 == 0)
+                                         gameMove(self, index, x1, y1, x2, y2, valueAccessor, context);
+                                 })
+                                 .mouseup(function () {
+                                     index = context.$index();
+                                     var observable = valueAccessor();
+
+                                     var x1, y1, x2, y2;
+                                     x1 = context.$root.clickedX();
+                                     y1 = context.$root.clickedY();
+
+                                     x2 = index + 1;
+                                     y2 = context.$parent.num;
+
+                                     var self = jQuery(this);
+                                     if ((x1 != x2 || y1 != y2) && (x1 != 0 || y1 != 0))
+                                         gameMove(self, index, x1, y1, x2, y2, valueAccessor, context);
+                                 })
+                        });
+                }
+            };
+
+
+            this.content = ko.observable();
+            this.content.loading = ko.observable(false);
+            this.loadContent = function () {
+                this.content.loading(true);
+                setTimeout(function () {
+                    self.content.loading(false);
+                    //self.content("here is my content");
+                }, 2000);
+            };
+            this.fbLike = '<iframe src="//www.facebook.com/plugins/like.php?href=https%3A%2F%2Fwww.facebook.com%2Fnonstopwordscom&amp;send=false&amp;layout=standard&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=35&amp;appId=248883625220654" scrolling="no" frameborder="0" style="border:none; overflow:hidden;height:35px;" allowTransparency="true"></iframe>';
+
+        }
+
+        function Word(w) {
+            this.word = w;
+            this.isFound = ko.observable(false);
+
+        }
+        function WordsViewModel() {
+            this.words = ko.observableArray();
+            this.showWordsToFind = ko.observable(true);
+            this.markAsFound = function (word) {
+                //see if we already have this word  
+                var matchingWord = ko.utils.arrayFirst(this.words(), function (item) {
+                    return item.word === word;
+                });
+
+                if (matchingWord) {
+                    matchingWord.isFound(true);
+                    return true;
+                }
+                return false;
+            };
+        }
+        // Here our viewModel only contains an empty listModel
+        function ViewModel() {
+            this.gameModel = new GameViewModel();
+            this.wordsModel = new WordsViewModel();
+            this.feedbackViewModel = new FeedbackViewModel();
+        };
+
+        var viewModel = new ViewModel();
+
+
+        jQuery(function () {
+            //viewModel.gameModel.loadContent();
+            jQuery.getJSON("http://nonstopwords.com/games/data/@(Model.GameId)?language=@(Model.Language)&isDaily=@(Model.IsDaily)&level=@(Model.Level)&jsoncallback=?", function (data) {
+                if (data) {
+
+                    viewModel.gameModel.gameId(data.gameId);
+                    viewModel.gameModel.level("@(Model.Level)");
+                    viewModel.gameModel.isDaily("@(Model.IsDaily)" == "True");
+                    viewModel.gameModel.language("@(Model.Language)");
+                    viewModel.gameModel.nrLevels(data.nrLevels);
+                    viewModel.gameModel.rows(jQuery.map(data.letters, function (row) {
+                        return new Row(row.num, row.cells);
+                    }));
+
+                    ko.applyBindings(viewModel.gameModel, document.getElementById('wordsearchgame'));
+
+                    //get the words
+                    jQuery.getJSON("http://nonstopwords.com/games/GetWords/" + viewModel.gameModel.gameId() + "?jsoncallback=?", function (data) {
+                        if (data) {
+                            viewModel.wordsModel.words(jQuery.map(data.words, function (w) {
+                                return new Word(w);
+                            }));
+                        }
+                        ko.applyBindings(viewModel.wordsModel, document.getElementById('words'));
+                    });
+                }
+            });
+            jQuery("#countdown").stopwatch();
+            ko.applyBindings(viewModel.feedbackViewModel, document.getElementById('yourFeedbackSection'));
+            //viewModel.gameModel.content.loading(false);
+        });
+
+    </script>
+</article>
+

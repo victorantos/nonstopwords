@@ -1,0 +1,73 @@
+﻿@using Wordament.Models;
+ 
+ <table style="border-bottom: 1px dashed black; border-right: 1px dashed black; border-top: 1px dashed black; border-left: 1px dashed black;">
+     <tr>
+         <td style="padding-left: 10px;">@{ Html.RenderPartial("Wordsearch", @Model.DailyPuzzleViewModel as GameViewModel);  }</td>
+
+     </tr>
+     <tr>
+       <td style="padding-left: 10px;">@{ Html.RenderPartial("HallOfFame", @Model.HallOfFameViewModel as HallOfFameViewModel);  }</td> 
+
+     </tr>
+ 
+     <tr>
+         <td style="float: right; padding-right: 4px; padding-bottom: 4px;border:none;"  >
+             <table style="border:none;">
+                 <tr style="border-top:1px dashed lightGray;">
+                     <td id="embedSection" style="padding-left: 4px;">
+                         <div style="height: 20px;"></div>
+                         <div data-bind="click: showHideEmbedCode " style="cursor: pointer; height: 20px; margin-left: 0px; display: inline; padding-right: 30px;">
+                             <img style="width: 20px; vertical-align: middle" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAWCAYAAACosj4+AAACtElEQVR42sVWTWsaURT1H+Qn5CfkJ8wuICK2qcVSF1kWXcToKpuQVbBF6eBaISAKUiPSRbNrLHGliyq46KpUaa0mGj9DUKve3occeB1nnKEIOXAX+u55c+69570Z2zZBRCEO4JvtqdHpdCpQk06nif8SoWyr2mccVY4hR9hCvoMkeDwegiD+ec7R4qhzvPkfMZ67u7suNm+1WpuqBSeO/FKpJHIRO5PJ5B5r3W6X/H6/+P/Mqhh3r9f7TRJubm5MBc3n8wHyT09PkV8Ra1zcV5LA+0PUoZmY51zBLxBRrcPh2CQIZsbDkIsHinV7LpcjGe1221AUNn15e3vbkUnlcpmcTqf8gF097nQ6LeqYuS/GhRzepwJR8vh8Pp/IVbViXmjFVKtV2t/f11RramZ0U88je4qiUD6fJ834IOoCG74ejUZNbWfsdrtcqcuKma+vr8H5YZCuiLUNnXKJDUskoVgsylVWMCYj8Al6ADcUCoHn2kDZcbvdn1KpFPFBIKBer68Kmc1mP4mh44G8IJscgiB4/X4fvILNAi4vL7+QhOFwuOKzV96Px2OSkclkLN2wzKuBk0gkIGjPwtXydrFY/AFXdCocDq/4AicnJ/dCoYyrqyucEsPLU9fM5mLCy+VyLnMjkcia91xi/oPBgGSw+aZGfnh8fPyAvEKhgA3JRMw70iAWi4G35r2Lo6Mj0nYqm83SwcFBcU0QQ8fMqoEQpVarZXg0S3B4ZBSNRsEzfJWogUBgrVPJZPIfAhv4XOdmrhiNuNlsfsSJAqyIAQ6DwSDB6LgnhA4k8LX/HWvxeNzUzHi5Aqqqml2466KOj4+JH0w8GTE2kEX7X2nMjO4YotFofOaui27CwJIY6ziTiLKg9JqZzT8lFHkfcLb14dbXMfOu7Snh9XofIAbjemqoGh9sDX8BN0wZ7TVSIFEAAAAASUVORK5CYII=" alt="Embed wordsearch game into your own blog" />
+                             <span style="text-decoration: underline;" style="margin-left: -15px;">Embed on your website. </span>
+                         </div>
+                         <div data-bind="visible: isEmbedCodeVisible" style="color: #999;">
+
+
+                             <textarea id="embedNSW" cols="22" rows="3"> <a data-widget-id="3" id="nswGame"  href="http://nonstopwords.com/victorantos" title="Wordsearch puzzle - play free online games."> Wordsearch by @@victorantos </a> <script src="http://nonstopwords.com/wordsearch.js" type="text/javascript"> </script></textarea>
+                             <br />
+                             Copy and paste the code above<br />
+                             into the HTML of your site/blog.
+                             
+                             <script type="text/javascript">
+                                 var textBox = document.getElementById("embedNSW");
+                                 textBox.onfocus = function () {
+                                     textBox.select();
+
+                                     // Work around Chrome's little problem
+                                     textBox.onmouseup = function () {
+                                         // Prevent further mouseup intervention
+                                         textBox.onmouseup = null;
+                                         return false;
+                                     };
+                                 };
+                             </script>
+                         </div>
+                     </td>
+                     <td >
+                         <div style="height: 20px;">&nbsp;</div>
+                         <div style="height: 15px; font-size: small; float: right;" class="grid">
+
+                             <span><a style="font-size: small;" href="http://nonstopwords.com" target="_blank" title="Play Online Word Games - Free Wordsearch.">Wordsearch</a>
+                                 by  <a style="font-size: small;" href="http://nonstopwords.com" target="_blank" title="Play Online Word Games - Free Wordsearch.">NonstopWords.com</a></span>
+
+                         </div>
+
+                     </td>
+                 </tr>
+             </table>
+         </td>
+     </tr>
+ </table>
+
+<script type="text/javascript">
+    function EmbedViewModel() {
+        var self = this;
+        this.isEmbedCodeVisible = ko.observable(false);
+        this.showHideEmbedCode = function () {
+            var vb = !self.isEmbedCodeVisible();
+            self.isEmbedCodeVisible(vb);
+        }
+
+    };
+    ko.applyBindings(new EmbedViewModel(), document.getElementById('embedSection'));
+</script>

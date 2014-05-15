@@ -1,0 +1,13 @@
+﻿@using Wordament.Models;
+@{
+    ViewBag.Title = "Your friend's puzzle";
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryui")
+}
+<h2>You friend's puzzle</h2>
+ 
+
+@{ Html.RenderPartial("Wordsearch", @Model as GameViewModel);  }
+
+ 
