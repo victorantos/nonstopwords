@@ -118,7 +118,8 @@ namespace Wordament.Controllers
 
             return new JsonpResult
             {
-                Data = new { gameId = id, words = game.Words.Select(l => l.Letters) },
+                //TODO
+                //Data = new { gameId = id, words = game.Words.Select(l => l.Letters) },
                 JsonRequestBehavior = JsonRequestBehavior.AllowGet
             };
         }
@@ -130,7 +131,7 @@ namespace Wordament.Controllers
             var lines = new List<GameLine>();
             var game = GameHelper.LoadGame(gameGroupId, "Easy 5x5");
                
-            Tuple<int,int> max = GetMaxXandY(game.Words);
+            Tuple<int,int> max = GetMaxXandY(game.GameWords.Select(w=>w.Word).ToList());
             int nrLines = max.Item1;
             if (max.Item2 > max.Item1)
                 nrLines = max.Item2;
@@ -145,25 +146,25 @@ namespace Wordament.Controllers
                 }
                 lines.Add(newLine);
             }
-            foreach (var item in game.Words)
+            foreach (var item in game.GameWords.Select(w => w.Word))
             {
-                
-                var x1 = item.Position.StartWord.X;
-                var y1 = item.Position.StartWord.Y;
-                var x2 = item.Position.EndWord.X;
-                var y2 = item.Position.EndWord.Y;
+
+                var x1 = item.GameVariants.First().X1;
+                var y1 = item.GameVariants.First().Y1;
+                var x2 = item.GameVariants.First().X2;
+                var y2 = item.GameVariants.First().Y2;
  
                 if (y1 == y2)
                 {
                     if (x1 < x2)
                     {
                         for (short k = 0, j = x1; j <= x2; j++, k++)
-                            SetValue(lines[y1 - 1], j, item.Letters[k].ToString().ToUpper());
+                            SetValue(lines[y1 - 1], j, item.Word1[k].ToString().ToUpper());
                     }
                     else
                     {
                         for (short k = (short)(x1 - x2), j = x2; j <= x1; j++, k--)
-                            SetValue(lines[y1 - 1], j, item.Letters[k].ToString().ToUpper());
+                            SetValue(lines[y1 - 1], j, item.Word1[k].ToString().ToUpper());
                     }
                 }
                 else
@@ -173,12 +174,12 @@ namespace Wordament.Controllers
                         if (y1 < y2)
                         {
                             for (short k = 0, j = y1; j <= y2; j++, k++)
-                                SetValue(lines[j - 1], x1, item.Letters[k].ToString().ToUpper());
+                                SetValue(lines[j - 1], x1, item.Word1[k].ToString().ToUpper());
                         }
                         else
                         {
                             for (short k = (short)(y1-y2), j = y2; j <= y1; j++, k--)
-                                SetValue(lines[j-1], x1, item.Letters[k].ToString().ToUpper());
+                                SetValue(lines[j-1], x1, item.Word1[k].ToString().ToUpper());
                         }
                     }
                     else
@@ -189,12 +190,12 @@ namespace Wordament.Controllers
                             if (y1 > y2)
                             {
                                 for (short k = 0, j = y1; j >= y2; j--, k++)
-                                    SetValue(lines[j-1], (short)(x1 - k), item.Letters[k].ToString().ToUpper());
+                                    SetValue(lines[j-1], (short)(x1 - k), item.Word1[k].ToString().ToUpper());
                             }
                             else
                             {
                                 for (short k = 0, j = y1; j <= y2; j++, k++)
-                                    SetValue(lines[j-1], (short)(x1 - k), item.Letters[k].ToString().ToUpper());
+                                    SetValue(lines[j - 1], (short)(x1 - k), item.Word1[k].ToString().ToUpper());
                             }
                         }
                             //is ltr
@@ -203,12 +204,12 @@ namespace Wordament.Controllers
                             if (y1 > y2)
                             {
                                 for (short k = 0, j = y1; j >= y2; j--, k++)
-                                    SetValue(lines[j-1], (short)(x1 + k), item.Letters[k].ToString().ToUpper());
+                                    SetValue(lines[j - 1], (short)(x1 + k), item.Word1[k].ToString().ToUpper());
                             }
                             else
                             {
                                 for (short k = 0, j = y1; j <= y2; j++, k++)
-                                    SetValue(lines[j-1], (short)(x1 + k), item.Letters[k].ToString().ToUpper());
+                                    SetValue(lines[j - 1], (short)(x1 + k), item.Word1[k].ToString().ToUpper());
                             }
                         }
                     }
@@ -222,17 +223,17 @@ namespace Wordament.Controllers
             int maxX = 0, maxY = 0;
             foreach (var item in list)
             {
-                if (item.Position.StartWord.X >= item.Position.EndWord.X && item.Position.StartWord.X > maxX)
-                   maxX = item.Position.StartWord.X;
+                if (item.GameVariants.First().X1 >= item.GameVariants.First().X2 && item.GameVariants.First().X1 > maxX)
+                    maxX = item.GameVariants.First().X1;
                 else
-                    if (item.Position.EndWord.X >= item.Position.StartWord.X && item.Position.EndWord.X > maxX)
-                       maxX = item.Position.EndWord.X;
+                    if (item.GameVariants.First().X2 >= item.GameVariants.First().X1 && item.GameVariants.First().X2 > maxX)
+                        maxX = item.GameVariants.First().X2;
 
-                if (item.Position.StartWord.Y >= item.Position.EndWord.Y && item.Position.StartWord.Y > maxY)
-                    maxY = item.Position.StartWord.Y;
+                if (item.GameVariants.First().Y1 >= item.GameVariants.First().Y2 && item.GameVariants.First().Y1 > maxY)
+                    maxY = item.GameVariants.First().Y1;
                 else
-                    if (item.Position.EndWord.Y >= item.Position.StartWord.Y && item.Position.EndWord.Y > maxY)
-                        maxY = item.Position.EndWord.Y;
+                    if (item.GameVariants.First().Y2 >= item.GameVariants.First().Y1 && item.GameVariants.First().Y2 > maxY)
+                        maxY = item.GameVariants.First().Y2;
             }
 
             Tuple<int, int> max = Tuple.Create<int, int>(maxX, maxY);
@@ -266,7 +267,7 @@ namespace Wordament.Controllers
             }
 
             var dbContext = new Entities();
-            Wordament.GameHistory f = new Wordament.GameHistory
+            GameHistory f = new GameHistory
             {
                 GameGroupId = id,
                 DateFinished = DateTime.UtcNow,
@@ -295,7 +296,7 @@ namespace Wordament.Controllers
 
            
             var dbContext = new Entities();
-            Wordament.GameHistory f = new Wordament.GameHistory
+            GameHistory f = new GameHistory
             {
                 GameGroupId = gameOver.Id,
                 DateFinished = DateTime.UtcNow,
@@ -330,34 +331,34 @@ namespace Wordament.Controllers
             var game = GameHelper.LoadGame(int.Parse(gameId), "Easy 5x5");
             var isWord = false;
             var isReverse = false;
-            if (game != null)
-            {
-                if (game.Words.Exists(w => w.Position.StartWord.X.ToString() == x1 && w.Position.StartWord.Y.ToString() == y1 &&
-                    w.Position.EndWord.X.ToString() == x2 && w.Position.EndWord.Y.ToString() == y2))
-                {
-                    isWord = true;
+            //if (game != null)
+            //{
+            //    if (game.GameWords.Select(w => w.Word).ToList().Exists(w => w.GameVariants.StartWord.X.ToString() == x1 && w.Word.StartWord.Y.ToString() == y1 &&
+            //        w.Position.EndWord.X.ToString() == x2 && w.Position.EndWord.Y.ToString() == y2))
+            //    {
+            //        isWord = true;
 
-                    return new JsonpResult
-                    {
-                        Data = new { result = isWord },
-                        JsonRequestBehavior = JsonRequestBehavior.AllowGet
-                    };
+            //        return new JsonpResult
+            //        {
+            //            Data = new { result = isWord },
+            //            JsonRequestBehavior = JsonRequestBehavior.AllowGet
+            //        };
  
-                }
-                else
-                    if (game.Words.Exists(w => w.Position.EndWord.X.ToString() == x1 && w.Position.EndWord.Y.ToString() == y1 &&
-                        w.Position.StartWord.X.ToString() == x2 && w.Position.StartWord.Y.ToString() == y2))
-                    {
-                        isWord = true;
-                        isReverse = true;
+            //    }
+            //    else
+            //        if (game.GameWords.Select(w => w.Word).Exists(w => w.Position.EndWord.X.ToString() == x1 && w.Position.EndWord.Y.ToString() == y1 &&
+            //            w.Position.StartWord.X.ToString() == x2 && w.Position.StartWord.Y.ToString() == y2))
+            //        {
+            //            isWord = true;
+            //            isReverse = true;
  
-                        return new JsonpResult
-                        {
-                            Data = new { result = isWord, r = isReverse },
-                            JsonRequestBehavior = JsonRequestBehavior.AllowGet
-                        };
-                    }
-            }
+            //            return new JsonpResult
+            //            {
+            //                Data = new { result = isWord, r = isReverse },
+            //                JsonRequestBehavior = JsonRequestBehavior.AllowGet
+            //            };
+            //        }
+            //}
             return new JsonpResult
             {
                 Data = new { result = isWord  },

@@ -7,13 +7,17 @@ namespace Wordament.Models
 {
     public class Game
     {
-        public Game(int number)
+        public Game()
         {
-            this.Number = number;
+            this.GameGroups = new HashSet<GameGroup>();
+            this.GameWords = new HashSet<GameWord>();
         }
-         
-        public int Number { get; set; }
-        public List<Word> Words{get;set;}
 
+        public int GameId { get; set; }
+        public string Name { get; set; }
+        public System.DateTime DateCreated { get; set; }
+
+        public virtual ICollection<GameGroup> GameGroups { get; set; }
+        public virtual ICollection<GameWord> GameWords { get; set; }
     }
 }

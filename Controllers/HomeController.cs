@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web.Mvc;
 using Wordament;
 using Wordament.Models;
+using System.Data.Entity;
 
 namespace wwwroot.Controllers
 {
@@ -32,7 +33,7 @@ namespace wwwroot.Controllers
             var firstSunday = new DateTime(1753, 1, 7);
             int x = (int)DateTime.UtcNow.DayOfWeek;
             var now = DateTime.Now;
-            var todayPuzzle = dbContext.DailyPuzzles.Where(p => p.DateWhenActive.HasValue && (EntityFunctions.DiffDays(firstSunday, p.DateWhenActive.Value) % 7 == x) && (EntityFunctions.DiffDays(p.DateWhenActive.Value, now) == 0)).FirstOrDefault();
+            var todayPuzzle = dbContext.DailyPuzzles.Where(p => p.DateWhenActive.HasValue && (DbFunctions.DiffDays(firstSunday, p.DateWhenActive.Value) % 7 == x) && (DbFunctions.DiffDays(p.DateWhenActive.Value, now) == 0)).FirstOrDefault();
 
             if (todayPuzzle != null)
             {
@@ -77,7 +78,7 @@ namespace wwwroot.Controllers
         public JsonResult Feedback(Wordament.Models.Feedback feedback)
         {
             var dbContext = new Entities();
-            Wordament.Feedback f = new Wordament.Feedback
+            Feedback f = new Feedback
             {
                 Email = feedback.Email,
                 Message = feedback.Message,
