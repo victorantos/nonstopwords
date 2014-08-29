@@ -1,5 +1,10 @@
-/obj/Debug/TempPE
-/obj/Debug
-/*.user
+/bin/*.xml
 
-/*.suo
+/obj/Debug
+/bin/*.pdb
+
+/bin/nonstopwords.dll
+
+/bin/*.config
+
+/*.user
